@@ -1,0 +1,128 @@
+:root {
+  --accent: #facc15;      /* warm gold */
+  --accent-2: #eab308;    /* deeper gold */
+  --ink: #0b1220;
+  --glass: rgba(15,23,42,0.55);
+}
+
+* { box-sizing: border-box; }
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, Roboto, sans-serif;
+  color: #e8eefc;
+  overflow: hidden;
+  background: #0b1220;
+}
+
+/* Scene */
+.scene {
+  position: fixed;
+  inset: 0;
+  background: center/cover no-repeat;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 70%, transparent 40%, rgba(0,0,0,.6) 100%);
+}
+
+/* Layout */
+.hud {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+
+/* Dialogue box */
+.dialogue {
+  position: relative;                /* anchor point for nameplate */
+  align-self: end;
+  width: min(100%, 1100px);
+  margin: 0 auto 3vh;
+  background: rgba(15,23,42,.6);
+  backdrop-filter: blur(8px);
+  border-radius: 1rem;
+  padding: 1.25rem;                  /* inner padding */
+  padding-top: 3.1rem;               /* space for nameplate chip */
+  border: 1px solid rgba(255,255,255,.2);
+}
+.dialogue .text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  min-height: 5rem;
+}
+
+/* Nameplate – anchored to the dialogue, not viewport */
+.nameplate {
+  position: absolute;
+  z-index: 2;
+  left: 1.25rem;                     /* matches dialogue padding */
+  top: 0;
+  transform: translateY(-58%);       /* sits on the rim */
+  background: rgba(17,24,39,0.9);
+  color: #e8eefc;
+  border: 1px solid rgba(255,255,255,.18);
+  padding: .38rem .85rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: .86rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  box-shadow: 0 6px 16px rgba(0,0,0,.28);
+}
+/* little notch so it visually attaches to the box */
+.nameplate::after{
+  content: "";
+  position: absolute;
+  left: 1rem;
+  bottom: -.46rem;
+  width: .82rem; height: .82rem;
+  background: rgba(17,24,39,0.9);
+  transform: rotate(45deg);
+  border-left: 1px solid rgba(255,255,255,.18);
+  border-bottom: 1px solid rgba(255,255,255,.18);
+  border-bottom-left-radius: .2rem;
+}
+
+/* Choices */
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: .8rem;
+}
+.choice {
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  color: #2b2b2b;
+  padding: .7rem 1rem;
+  border-radius: .9rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,.3);
+  transition: transform .1s ease, filter .1s ease;
+}
+.choice:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+/* Responsive */
+@media (max-width: 720px){
+  .dialogue{ padding-top: 2.8rem; }
+  .nameplate{ font-size:.8rem; transform: translateY(-62%); }
+  .nameplate::after{ left: .9rem; bottom: -.42rem; width: .72rem; height: .72rem; }
+}
+/* layering to ensure visibility */
+.scene   { z-index: 0; }
+.overlay { z-index: 1; }
+.hud     { z-index: 3; }
+.stats   { z-index: 5; } /* <- stats bar stays above everything */
+.stats{position:fixed;top:1rem;left:1rem;display:grid;gap:.5rem;min-width:260px;
+  background:rgba(15,23,42,.55);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);
+  padding:.6rem .7rem;border-radius:.8rem;z-index:5}
+.stat{display:grid;grid-template-columns:90px 1fr auto;gap:.5rem;align-items:center}
+.stat-label{font-size:.85rem;opacity:.9}
+.stat-bar{height:.6rem;border-radius:.5rem;overflow:hidden;background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.18)}
+.stat-fill{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#84cc16)}
+.stat-fill.budget{background:linear-gradient(90deg,#f59e0b,#f97316)}
+.scene{z-index:0}.overlay{z-index:1}.hud{z-index:3}.stats{z-index:5}

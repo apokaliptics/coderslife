@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Coder’s Life — Bà bán xôi</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .scene { background-image: url('touchgrass1.png'); } /* đổi ảnh nền */
+    .grid { display:grid; grid-template-columns: 1fr auto auto; gap:.6rem 1rem; align-items:center; }
+    .grid .hdr { font-weight:700; opacity:.9; }
+    .pill { background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:.6rem; padding:.25rem .5rem; }
+    .row { padding:.35rem .5rem; border-radius:.5rem; }
+    .row:hover { background: rgba(255,255,255,.04); }
+    .right { text-align:right; }
+    .footerbar { display:flex; gap:.6rem; align-items:center; justify-content:space-between; margin-top:.9rem; }
+    .meta { opacity:.85; font-size:.95rem; }
+    .toast { display:none; margin-top:.6rem; padding:.6rem .8rem; border-radius:.6rem; border:1px solid rgba(255,255,255,.18); background:rgba(17,24,39,.75); }
+    .btn-secondary { background: rgba(255,255,255,.09); color:#e8eefc; border:1px solid rgba(255,255,255,.2); border-radius:.9rem; padding:.7rem 1rem; text-decoration:none; font-weight:700; }
+  </style>
+</head>
+<body>
+  <div class="scene"></div>
+  <div class="overlay"></div>
+
+  <div class="hud">
+    <div class="dialogue" role="dialog" aria-live="polite">
+      <div class="nameplate">Bà bán xôi</div>
+      <div class="text">
+        “Thôi chọn khéo đi!”
+      </div>
+
+      <!-- MINI-GAME -->
+      <div class="grid" id="menu">
+        <div class="hdr">Món</div>
+        <div class="hdr right">Giá (k)</div>
+        <div class="hdr right">Calo</div>
+
+        <!-- name / priceK / calories / qty -->
+        <div class="row">
+          <label class="pill">Xôi lạc</label>
+          <div class="right">10</div>
+          <div class="right">350</div>
+        </div>
+        <div class="row">
+          <select data-name="Xôi lạc" data-price="10" data-cal="350" class="qty">
+            <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label class="pill">Xôi trứng</label>
+          <div class="right">15</div>
+          <div class="right">420</div>
+        </div>
+        <div class="row">
+          <select data-name="Xôi trứng" data-price="15" data-cal="420" class="qty">
+            <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label class="pill">Xôi thịt</label>
+          <div class="right">25</div>
+          <div class="right">500</div>
+        </div>
+        <div class="row">
+          <select data-name="Xôi thịt" data-price="25" data-cal="500" class="qty">
+            <option value="0">x0</option><option value="1">x1</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label class="pill">Ruốc topping</label>
+          <div class="right">8</div>
+          <div class="right">120</div>
+        </div>
+        <div class="row">
+          <select data-name="Ruốc" data-price="8" data-cal="120" class="qty">
+            <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label class="pill">Giò topping</label>
+          <div class="right">12</div>
+          <div class="right">200</div>
+        </div>
+        <div class="row">
+          <select data-name="Giò" data-price="12" data-cal="200" class="qty">
+            <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="footerbar">
+        <div class="meta">
+          Ngân sách mục tiêu: <strong>≤ 25k</strong> · Mục tiêu no: <strong>≥ 700 cal</strong>
+          <span id="totals" style="margin-left:.6rem; opacity:.9;"></span>
+        </div>
+        <div style="display:flex; gap:.6rem;">
+          <button id="calc" class="choice" type="button">Chốt combo</button>
+          <a href="street.html" class="btn-secondary">Bỏ qua</a>
+        </div>
+      </div>
+
+      <div id="result" class="toast" aria-live="assertive"></div>
+
+      <div class="choices" style="margin-top:.8rem; display:none;" id="nextChoices">
+        <a class="choice" id="proceed" href="trada.html">Tiếp tục — Bà trà đá</a>
+        <a class="btn-secondary" href="xoi.html">Làm lại</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const qtyEls = [...document.querySelectorAll('.qty')];
+    const totalsEl = document.getElementById('totals');
+    const resultEl = document.getElementById('result');
+    const nextChoices = document.getElementById('nextChoices');
+    const proceed = document.getElementById('proceed');
+
+    function recompute(){
+      let price = 0, cal = 0;
+      qtyEls.forEach(sel=>{
+        const q = +sel.value;
+        const p = +sel.dataset.price;
+        const c = +sel.dataset.cal;
+        price += q * p;
+        cal   += q * c;
+      });
+      totalsEl.textContent = `| Tổng: ${price}k · ${cal} cal`;
+      return {price, cal};
+    }
+
+    function score({price, cal}){
+      // simple rubric:
+      // GREAT: <=25k and >=700 cal and cal/price >= 25
+      // OK:    <=25k and >=600 cal
+      // BAD:   otherwise
+      const ratio = price ? (cal/price) : 0;
+      if (price <= 25 && cal >= 700 && ratio >= 25) return 'great';
+      if (price <= 25 && cal >= 600) return 'ok';
+      return 'bad';
+    }
+
+    function message(tag){
+      if (tag==='great') return [
+        'Khá đấy! Combo “rẻ mà no” chuẩn bài. +5 Logic, +5 Insight.',
+        'trada.html'
+      ];
+      if (tag==='ok') return [
+        'Tạm ổn, nhưng còn tối ưu được nữa. +2 Logic.',
+        'trada.html'
+      ];
+      return [
+        'Thế theo cậu, no bao nhiêu là đủ? Combo vừa đắt vừa đói. -5 Insight.',
+        'xoi.html'
+      ];
+    }
+
+    qtyEls.forEach(sel=> sel.addEventListener('change', recompute));
+    recompute();
+
+    document.getElementById('calc').addEventListener('click', ()=>{
+      const totals = recompute();
+      const tag = score(totals);
+      const [line, nextHref] = message(tag);
+      resultEl.textContent = line;
+      resultEl.style.display = 'block';
+      nextChoices.style.display = 'flex';
+      proceed.href = nextHref;
+    });
+  </script>
+</body>
+</html>

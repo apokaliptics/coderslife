@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coder’s Life — Scene 1</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Scene-specific overrides */
+    .scene { background-image: url('prologue.png'); }
+
+    /* Nameplate anchored to dialogue */
+    .dialogue { position: relative; padding: 1.25rem 1.25rem 1.2rem; padding-top: 3.1rem; }
+    .nameplate {
+      position: absolute; z-index: 2; left: 1.25rem; top: 0; transform: translateY(-58%);
+      background: rgba(17,24,39,0.9); color:#e8eefc; border:1px solid rgba(255,255,255,.18);
+      padding:.38rem .85rem; border-radius:999px; font-weight:800; font-size:.86rem; letter-spacing:.04em; text-transform:uppercase;
+      box-shadow:0 6px 16px rgba(0,0,0,.28);
+    }
+    .nameplate::after{
+      content:""; position:absolute; left:1.1rem; bottom:-.46rem; width:.82rem; height:.82rem;
+      background:rgba(17,24,39,0.9); transform:rotate(45deg);
+      border-left:1px solid rgba(255,255,255,.18); border-bottom:1px solid rgba(255,255,255,.18); border-bottom-left-radius:.2rem;
+    }
+    /* Warm choice color */
+    .choice { background: linear-gradient(180deg, #facc15, #eab308); color:#2b2b2b; border:1px solid rgba(255,255,255,.3); }
+    .choice:hover { transform: translateY(-2px); filter: brightness(1.08); }
+    /* Ensure layering */
+    .scene{z-index:0} .overlay{z-index:1} .hud{z-index:3} .stats{z-index:5}
+
+    @media (max-width: 720px){
+      .dialogue{ padding-top: 2.8rem; }
+      .nameplate{ font-size:.8rem; transform: translateY(-62%); }
+      .nameplate::after{ left:1rem; bottom:-.42rem; width:.72rem; height:.72rem; }
+    }
+  </style>
+
+  <!-- Shared stats logic (single source of truth) -->
+  <script src="stats.js" defer></script>
+</head>
+<body>
+  <!-- Background -->
+  <div class="scene"></div>
+  <div class="overlay"></div>
+
+  <!-- Dialogue -->
+  <div class="hud">
+    <div class="dialogue" role="dialog" aria-live="polite" aria-label="Hộp thoại" aria-labelledby="who">
+      <div class="nameplate" id="who">Hải</div>
+      <div class="text">
+        Alô mẹ hả… tháng này con hết tiền rồi ạ. Thôi không sao… Chêm ơi, đi “touch grass” hay ngồi debug tiếp?
+      </div>
+      <div class="choices">
+        <a class="choice" href="touch-grass.html">Ra ngoài — Touch grass</a>
+        <a class="choice" href="code-loop.html">Ở lại — Tiếp tục code</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS HUD (single instance) -->
+  <div class="stats" id="statsHud" hidden>
+    <div class="stat">
+      <div class="stat-label">Insight</div>
+      <div class="stat-bar"><div class="stat-fill" id="insightFill"></div></div>
+      <div class="stat-val" id="insightVal">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Logic</div>
+      <div class="stat-bar"><div class="stat-fill" id="logicFill"></div></div>
+      <div class="stat-val" id="logicVal">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Budget</div>
+      <div class="stat-bar"><div class="stat-fill budget" id="budgetFill"></div></div>
+      <div class="stat-val" id="budgetVal">0k</div>
+    </div>
+  </div>
+
+  <!-- Page-specific hook: change stats when clicking choices -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // stats.js will init and render the HUD automatically
+      const moreCode   = document.querySelector('a[href="code-loop.html"]');
+      const touchGrass = document.querySelector('a[href="touch-grass.html"]');
+      moreCode  && moreCode.addEventListener('click',  () => CODER.addStat('insight', -3));
+      touchGrass&& touchGrass.addEventListener('click', () => CODER.addStat('insight', +3));
+    });
+  </script>
+</body>
+</html>

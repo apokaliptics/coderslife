@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stats MWE</title>
+<style>
+  html,body{height:100%;margin:0;background:#0b1220;color:#e8eefc;font-family:Inter,system-ui,sans-serif}
+  .scene{position:fixed;inset:0;background:#08101c}
+  .overlay{position:fixed;inset:0;background:radial-gradient(70% 60% at 50% 70%,transparent 40%,rgba(0,0,0,.6))}
+  .hud{position:fixed;inset:0}
+  /* ===== STATS HUD (must have these) ===== */
+  .stats{position:fixed;top:1rem;left:1rem;display:grid;gap:.5rem;min-width:260px;
+    background:rgba(15,23,42,.55);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);
+    padding:.6rem .7rem;border-radius:.8rem;z-index:5}
+  .stat{display:grid;grid-template-columns:90px 1fr auto;gap:.5rem;align-items:center}
+  .stat-label{font-size:.85rem;opacity:.9}
+  .stat-bar{height:.6rem;border-radius:.5rem;overflow:hidden;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18)}
+  .stat-fill{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#84cc16)}
+  .stat-fill.budget{background:linear-gradient(90deg,#f59e0b,#f97316)}
+  .scene{z-index:0}.overlay{z-index:1}.hud{z-index:3}.stats{z-index:5}
+</style>
+</head>
+<body>
+<div class="scene"></div><div class="overlay"></div>
+<div class="hud"></div>
+
+<!-- STATS HUD -->
+<div class="stats" id="statsHud" hidden>
+  <div class="stat">
+    <div class="stat-label">Insight</div>
+    <div class="stat-bar"><div class="stat-fill" id="insightFill"></div></div>
+    <div class="stat-val" id="insightVal">0</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Logic</div>
+    <div class="stat-bar"><div class="stat-fill" id="logicFill"></div></div>
+    <div class="stat-val" id="logicVal">0</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Budget</div>
+    <div class="stat-bar"><div class="stat-fill budget" id="budgetFill"></div></div>
+    <div class="stat-val" id="budgetVal">0k</div>
+  </div>
+</div>
+
+<script>
+  // inline version of stats.js for the test
+  const DEFAULTS={insight:50,logic:0,budget:0};
+  function getStats(){const raw=localStorage.getItem('stats');try{return raw?{...DEFAULTS,...JSON.parse(raw)}:{...DEFAULTS}}catch{return {...DEFAULTS}}}
+  function setStats(s){localStorage.setItem('stats',JSON.stringify(s))}
+  function clamp01(x){return Math.max(0,Math.min(100,x))}
+  function renderStats(){
+    const s=getStats(); const hud=document.getElementById('statsHud'); hud.hidden=false;
+    const i=clamp01(s.insight), l=clamp01(s.logic), b=clamp01(s.budget);
+    document.getElementById('insightFill').style.width=i+'%';
+    document.getElementById('logicFill').style.width=l+'%';
+    document.getElementById('budgetFill').style.width=b+'%';
+    document.getElementById('insightVal').textContent=i;
+    document.getElementById('logicVal').textContent=l;
+    document.getElementById('budgetVal').textContent=s.budget+'k';
+  }
+  document.addEventListener('DOMContentLoaded',()=>{ if(!localStorage.getItem('stats')) setStats(DEFAULTS); renderStats(); });
+</script>
+</body>
+</html>

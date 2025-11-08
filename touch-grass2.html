@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coder’s Life — Scene 1</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Scene-specific overrides */
+    .scene { background-image: url('touchgrass1.png'); }
+
+    /* Anchor nameplate to the dialogue with a "tag" notch so alignment is exact */
+    .dialogue { position: relative; padding: 1.25rem 1.25rem 1.2rem 1.25rem; padding-top: 3.1rem; }
+
+    .nameplate {
+      position: absolute; z-index: 2; left: 1.25rem; top: 0; transform: translateY(-58%);
+      background: rgba(17,24,39,0.9); /* slate-900/90 */
+      color: #e8eefc; border: 1px solid rgba(255,255,255,.18);
+      padding: .38rem .85rem; border-radius: 999px;
+      font-weight: 800; font-size: .86rem; letter-spacing: .04em; text-transform: uppercase;
+      box-shadow: 0 6px 16px rgba(0,0,0,.28);
+    }
+    /* Little curved notch that connects the chip to the box */
+    .nameplate::after{
+      content: ""; position:absolute; left: 1.1rem; bottom: -.46rem; width: .82rem; height: .82rem;
+      background: rgba(17,24,39,0.9); transform: rotate(45deg);
+      border-left: 1px solid rgba(255,255,255,.18); border-bottom: 1px solid rgba(255,255,255,.18);
+      border-bottom-left-radius: .2rem; /* soften the corner */
+    }
+
+    /* Warmer choices */
+    .choice { background: linear-gradient(180deg, #facc15, #eab308); color: #2b2b2b; border:1px solid rgba(255,255,255,.3); }
+    .choice:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+    /* Mobile tweak so the tag doesn't overlap on small screens */
+    @media (max-width: 720px){
+      .dialogue{ padding-top: 2.8rem; }
+      .nameplate{ font-size:.8rem; transform: translateY(-62%); }
+      .nameplate::after{ left: 1rem; bottom: -.42rem; width: .72rem; height: .72rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene"></div>
+  <div class="overlay"></div>
+
+  <div class="hud">
+  <div class="dialogue" role="dialog" aria-live="polite" aria-label="Hộp thoại" aria-labelledby="who">
+    <div class="nameplate" id="who">Hải</div>
+    <div class="text">
+      Cảm ơn cháu nhiều nhé! Nay cậu ăn gì đây, tôi mời cậu một bữa!
+    </div>
+    <div class="choices">
+      <a class="choice" href="minigame1.html">Bắt đầu minigame</a>
+    </div>
+  </div>
+</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
