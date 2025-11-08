@@ -1,22 +1,95 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Coder’s Life — Bà bán xôi</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
   <style>
-    .scene { background-image: url('touchgrass1.png'); } /* đổi ảnh nền */
-    .grid { display:grid; grid-template-columns: 1fr auto auto; gap:.6rem 1rem; align-items:center; }
-    .grid .hdr { font-weight:700; opacity:.9; }
-    .pill { background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:.6rem; padding:.25rem .5rem; }
-    .row { padding:.35rem .5rem; border-radius:.5rem; }
-    .row:hover { background: rgba(255,255,255,.04); }
+    /* Scene */
+    .scene { background-image: url('touchgrass1.png'); }
+
+    /* Make the mini-game feel part of the dialogue box */
+    .dialogue { position: relative; padding: 1.25rem 1.25rem 1.2rem; padding-top: 3.1rem; }
+    .nameplate {
+      position: absolute; left: 1.25rem; top: 0; transform: translateY(-58%);
+      background: rgba(17,24,39,.9); color:#e8eefc; border:1px solid rgba(255,255,255,.18);
+      padding:.38rem .85rem; border-radius:999px; font-weight:800; font-size:.86rem; letter-spacing:.04em; text-transform:uppercase;
+      box-shadow:0 6px 16px rgba(0,0,0,.28);
+    }
+    .nameplate::after{
+      content:""; position:absolute; left:1.1rem; bottom:-.46rem; width:.82rem; height:.82rem;
+      background:rgba(17,24,39,.9); transform:rotate(45deg);
+      border-left:1px solid rgba(255,255,255,.18); border-bottom:1px solid rgba(255,255,255,.18);
+      border-bottom-left-radius:.2rem;
+    }
+
+    /* Table-like grid (no jitter) */
+    .menu {
+      display:grid;
+      grid-template-columns: 1.2fr .6fr .6fr .7fr; /* name | price | cal | qty */
+      gap:.5rem 1rem;
+      align-items:center;
+      margin-top:.6rem;
+      user-select:none;
+    }
+    .hdr {
+      font-weight:700; opacity:.9; padding:.2rem 0; border-bottom:1px solid rgba(255,255,255,.15);
+    }
+    .cell { padding:.3rem 0; }
     .right { text-align:right; }
+    .pill {
+      display:inline-block; background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.15); border-radius:.6rem; padding:.25rem .6rem;
+    }
+    .row {
+      display: contents; /* each logical row is still one grid row; keeps columns aligned */
+    }
+    .row:hover .cell { background: rgba(255,255,255,.04); }
+
+    /* Friendlier select */
+    select.qty {
+      width:100%; appearance:none; -webkit-appearance:none; -moz-appearance:none;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.2);
+      color:#e8eefc; border-radius:.6rem; padding:.4rem .6rem;
+      font-weight:600;
+      background-image: linear-gradient(180deg,transparent,transparent), radial-gradient(#e8eefc, #e8eefc);
+      background-position: right .7rem center, right .7rem center;
+      background-size: .5rem .5rem, .5rem .5rem;
+      background-repeat: no-repeat;
+    }
+    select.qty:focus { outline:2px solid rgba(250,204,21,.6); outline-offset:2px; }
+
+    /* Footer/status */
     .footerbar { display:flex; gap:.6rem; align-items:center; justify-content:space-between; margin-top:.9rem; }
-    .meta { opacity:.85; font-size:.95rem; }
-    .toast { display:none; margin-top:.6rem; padding:.6rem .8rem; border-radius:.6rem; border:1px solid rgba(255,255,255,.18); background:rgba(17,24,39,.75); }
-    .btn-secondary { background: rgba(255,255,255,.09); color:#e8eefc; border:1px solid rgba(255,255,255,.2); border-radius:.9rem; padding:.7rem 1rem; text-decoration:none; font-weight:700; }
+    .meta { opacity:.85; font-size:.95rem; display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; }
+    .meta .totals { opacity:.9; }
+
+    /* Result area reserves height to avoid layout jump */
+    .result-wrap { min-height: 3rem; }
+    .toast {
+      display:none;
+      margin-top:.4rem; padding:.6rem .8rem; border-radius:.6rem;
+      border:1px solid rgba(255,255,255,.18); background:rgba(17,24,39,.75);
+      animation: fadeIn .18s ease-out;
+    }
+    @keyframes fadeIn { from{opacity:0; transform:translateY(2px)} to{opacity:1; transform:none} }
+
+    /* Secondary button matches style.css mood */
+    .btn-secondary {
+      background: rgba(255,255,255,.09); color:#e8eefc;
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:.9rem; padding:.7rem 1rem; text-decoration:none; font-weight:700;
+      transition: transform .1s ease, filter .1s ease;
+    }
+    .btn-secondary:hover { transform: translateY(-1px); filter: brightness(1.06); }
+
+    /* Choices shown after scoring */
+    #nextChoices { display:none; margin-top:.8rem; }
+
+    /* Keep layers sane in case page CSS misses them */
+    .scene{z-index:0} .overlay{z-index:1} .hud{z-index:3}
   </style>
 </head>
 <body>
@@ -24,120 +97,112 @@
   <div class="overlay"></div>
 
   <div class="hud">
-    <div class="dialogue" role="dialog" aria-live="polite">
-      <div class="nameplate">Bà bán xôi</div>
-      <div class="text">
-        “Thôi chọn khéo đi!”
-      </div>
+    <div class="dialogue" role="dialog" aria-live="polite" aria-label="Bà bán xôi" aria-labelledby="who">
+      <div class="nameplate" id="who">Bà xôi</div>
+      <div class="text">“Rẻ mà no thì phải biết tính chứ, cậu coder. Chọn khéo đi!”</div>
 
-      <!-- MINI-GAME -->
-      <div class="grid" id="menu">
+      <!-- MINI-GAME (aligned grid) -->
+      <div class="menu" id="menu">
         <div class="hdr">Món</div>
         <div class="hdr right">Giá (k)</div>
         <div class="hdr right">Calo</div>
+        <div class="hdr right">Số lượng</div>
 
         <!-- name / priceK / calories / qty -->
         <div class="row">
-          <label class="pill">Xôi lạc</label>
-          <div class="right">10</div>
-          <div class="right">350</div>
-        </div>
-        <div class="row">
-          <select data-name="Xôi lạc" data-price="10" data-cal="350" class="qty">
+          <div class="cell"><span class="pill">Xôi lạc</span></div>
+          <div class="cell right">10</div>
+          <div class="cell right">350</div>
+          <div class="cell"><select data-name="Xôi lạc" data-price="10" data-cal="350" class="qty">
             <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
-          </select>
+          </select></div>
         </div>
 
         <div class="row">
-          <label class="pill">Xôi trứng</label>
-          <div class="right">15</div>
-          <div class="right">420</div>
-        </div>
-        <div class="row">
-          <select data-name="Xôi trứng" data-price="15" data-cal="420" class="qty">
+          <div class="cell"><span class="pill">Xôi trứng</span></div>
+          <div class="cell right">15</div>
+          <div class="cell right">420</div>
+          <div class="cell"><select data-name="Xôi trứng" data-price="15" data-cal="420" class="qty">
             <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
-          </select>
+          </select></div>
         </div>
 
         <div class="row">
-          <label class="pill">Xôi thịt</label>
-          <div class="right">25</div>
-          <div class="right">500</div>
-        </div>
-        <div class="row">
-          <select data-name="Xôi thịt" data-price="25" data-cal="500" class="qty">
+          <div class="cell"><span class="pill">Xôi thịt</span></div>
+          <div class="cell right">25</div>
+          <div class="cell right">500</div>
+          <div class="cell"><select data-name="Xôi thịt" data-price="25" data-cal="500" class="qty">
             <option value="0">x0</option><option value="1">x1</option>
-          </select>
+          </select></div>
         </div>
 
         <div class="row">
-          <label class="pill">Ruốc topping</label>
-          <div class="right">8</div>
-          <div class="right">120</div>
-        </div>
-        <div class="row">
-          <select data-name="Ruốc" data-price="8" data-cal="120" class="qty">
+          <div class="cell"><span class="pill">Ruốc topping</span></div>
+          <div class="cell right">8</div>
+          <div class="cell right">120</div>
+          <div class="cell"><select data-name="Ruốc" data-price="8" data-cal="120" class="qty">
             <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
-          </select>
+          </select></div>
         </div>
 
         <div class="row">
-          <label class="pill">Giò topping</label>
-          <div class="right">12</div>
-          <div class="right">200</div>
-        </div>
-        <div class="row">
-          <select data-name="Giò" data-price="12" data-cal="200" class="qty">
+          <div class="cell"><span class="pill">Giò topping</span></div>
+          <div class="cell right">12</div>
+          <div class="cell right">200</div>
+          <div class="cell"><select data-name="Giò" data-price="12" data-cal="200" class="qty">
             <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
-          </select>
+          </select></div>
         </div>
       </div>
 
       <div class="footerbar">
         <div class="meta">
-          Ngân sách mục tiêu: <strong>≤ 25k</strong> · Mục tiêu no: <strong>≥ 700 cal</strong>
-          <span id="totals" style="margin-left:.6rem; opacity:.9;"></span>
+          <span>Ngân sách mục tiêu: <strong>≤ 25k</strong></span>
+          <span>·</span>
+          <span>Mục tiêu no: <strong>≥ 700 cal</strong></span>
+          <span class="totals" id="totals"></span>
         </div>
         <div style="display:flex; gap:.6rem;">
-          <button id="calc" class="choice" type="button">Chốt combo</button>
+          <button id="calc" class="choice" type="button" disabled>Chốt combo</button>
           <a href="street.html" class="btn-secondary">Bỏ qua</a>
         </div>
       </div>
 
-      <div id="result" class="toast" aria-live="assertive"></div>
+      <div class="result-wrap">
+        <div id="result" class="toast" aria-live="assertive"></div>
+      </div>
 
-      <div class="choices" style="margin-top:.8rem; display:none;" id="nextChoices">
-        <a class="choice" id="proceed" href="trada.html">Tiếp tục</a>
-        <a class="btn-secondary" href="touch-grass2.html">Làm lại</a>
+      <div class="choices" id="nextChoices">
+        <a class="choice" id="proceed" href="trada.html">Tiếp tục — Bà trà đá</a>
+        <a class="btn-secondary" href="minigame1.html">Làm lại</a>
       </div>
     </div>
   </div>
 
   <script>
-    const qtyEls = [...document.querySelectorAll('.qty')];
-    const totalsEl = document.getElementById('totals');
-    const resultEl = document.getElementById('result');
-    const nextChoices = document.getElementById('nextChoices');
-    const proceed = document.getElementById('proceed');
+    const $ = (sel, ctx=document) => ctx.querySelector(sel);
+    const $$ = (sel, ctx=document) => [...ctx.querySelectorAll(sel)];
+    const qtyEls = $$('.qty');
+    const totalsEl = $('#totals');
+    const resultEl = $('#result');
+    const nextChoices = $('#nextChoices');
+    const proceed = $('#proceed');
+    const calcBtn = $('#calc');
 
     function recompute(){
-      let price = 0, cal = 0;
+      let price = 0, cal = 0, any = false;
       qtyEls.forEach(sel=>{
         const q = +sel.value;
-        const p = +sel.dataset.price;
-        const c = +sel.dataset.cal;
-        price += q * p;
-        cal   += q * c;
+        if (q>0) any = true;
+        price += q * (+sel.dataset.price);
+        cal   += q * (+sel.dataset.cal);
       });
       totalsEl.textContent = `| Tổng: ${price}k · ${cal} cal`;
+      calcBtn.disabled = !any;  // only allow submit if player picked something
       return {price, cal};
     }
 
     function score({price, cal}){
-      // simple rubric:
-      // GREAT: <=25k and >=700 cal and cal/price >= 25
-      // OK:    <=25k and >=600 cal
-      // BAD:   otherwise
       const ratio = price ? (cal/price) : 0;
       if (price <= 25 && cal >= 700 && ratio >= 25) return 'great';
       if (price <= 25 && cal >= 600) return 'ok';
@@ -145,34 +210,36 @@
     }
 
     function message(tag){
-      if (tag==='great') return [
-        'Khá đấy! Combo “rẻ mà no” chuẩn bài. +5 Logic, +5 Insight.',
-        'trada.html'
-      ];
-      if (tag==='ok') return [
-        'Tạm ổn, nhưng còn tối ưu được nữa. +2 Logic.',
-        'trada.html'
-      ];
-      return [
-        'Thế theo cậu, no bao nhiêu là đủ? Combo vừa đắt vừa đói. -5 Insight.',
-        'touch-grass2.html'
-      ];
+      if (tag==='great') return ['Khá đấy! Combo “rẻ mà no” chuẩn bài. +5 Logic, +5 Insight.', 'trada.html'];
+      if (tag==='ok')    return ['Tạm ổn, nhưng còn tối ưu được nữa. +2 Logic.', 'trada.html'];
+      return ['Thế theo cậu, no bao nhiêu là đủ? Combo vừa đắt vừa đói. -5 Insight.', 'minigame1.html'];
     }
 
+    // live totals
     qtyEls.forEach(sel=> sel.addEventListener('change', recompute));
     recompute();
 
-    document.getElementById('calc').addEventListener('click', ()=>{
+    // submit
+    calcBtn.addEventListener('click', ()=>{
       const totals = recompute();
       const tag = score(totals);
       const [line, nextHref] = message(tag);
+
+      // write result without shifting layout
       resultEl.textContent = line;
       resultEl.style.display = 'block';
+
+      // reveal choices
       nextChoices.style.display = 'flex';
       proceed.href = nextHref;
+
+      // hook into shared stats if present
+      if (window.CODER && window.CODER.addStat) {
+        if (tag==='great'){ CODER.addStat('logic',5); CODER.addStat('insight',5); CODER.setBudget?.(5); }
+        else if (tag==='ok'){ CODER.addStat('logic',2); CODER.setBudget?.(2); }
+        else { CODER.addStat('insight',-5); }
+      }
     });
   </script>
 </body>
 </html>
-
-
