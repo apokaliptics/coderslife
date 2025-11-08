@@ -102,83 +102,68 @@
       <div class="text">“Rẻ mà no thì phải biết tính chứ, cậu coder. Chọn khéo đi!”</div>
 
       <!-- MINI-GAME (aligned grid) -->
-      <div class="menu" id="menu">
-        <div class="hdr">Món</div>
-        <div class="hdr right">Giá (k)</div>
-        <div class="hdr right">Calo</div>
-        <div class="hdr right">Số lượng</div>
-
-        <!-- name / priceK / calories / qty -->
-        <div class="row">
-          <div class="cell"><span class="pill">Xôi lạc</span></div>
-          <div class="cell right">10</div>
-          <div class="cell right">350</div>
-          <div class="cell"><select data-name="Xôi lạc" data-price="10" data-cal="350" class="qty">
-            <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
-          </select></div>
-        </div>
-
-        <div class="row">
-          <div class="cell"><span class="pill">Xôi trứng</span></div>
-          <div class="cell right">15</div>
-          <div class="cell right">420</div>
-          <div class="cell"><select data-name="Xôi trứng" data-price="15" data-cal="420" class="qty">
-            <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
-          </select></div>
-        </div>
-
-        <div class="row">
-          <div class="cell"><span class="pill">Xôi thịt</span></div>
-          <div class="cell right">25</div>
-          <div class="cell right">500</div>
-          <div class="cell"><select data-name="Xôi thịt" data-price="25" data-cal="500" class="qty">
-            <option value="0">x0</option><option value="1">x1</option>
-          </select></div>
-        </div>
-
-        <div class="row">
-          <div class="cell"><span class="pill">Ruốc topping</span></div>
-          <div class="cell right">8</div>
-          <div class="cell right">120</div>
-          <div class="cell"><select data-name="Ruốc" data-price="8" data-cal="120" class="qty">
-            <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
-          </select></div>
-        </div>
-
-        <div class="row">
-          <div class="cell"><span class="pill">Giò topping</span></div>
-          <div class="cell right">12</div>
-          <div class="cell right">200</div>
-          <div class="cell"><select data-name="Giò" data-price="12" data-cal="200" class="qty">
-            <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
-          </select></div>
-        </div>
-      </div>
-
-      <div class="footerbar">
-        <div class="meta">
-          <span>Ngân sách mục tiêu: <strong>≤ 25k</strong></span>
-          <span>·</span>
-          <span>Mục tiêu no: <strong>≥ 700 cal</strong></span>
-          <span class="totals" id="totals"></span>
-        </div>
-        <div style="display:flex; gap:.6rem;">
-          <button id="calc" class="choice" type="button" disabled>Chốt combo</button>
-          <a href="street.html" class="btn-secondary">Bỏ qua</a>
-        </div>
-      </div>
-
-      <div class="result-wrap">
-        <div id="result" class="toast" aria-live="assertive"></div>
-      </div>
-
-      <div class="choices" id="nextChoices">
-        <a class="choice" id="proceed" href="trada.html">Tiếp tục — Bà trà đá</a>
-        <a class="btn-secondary" href="minigame1.html">Làm lại</a>
-      </div>
-    </div>
-  </div>
-
+<table class="menu-table" id="menu">
+  <thead>
+    <tr>
+      <th class="left">Món</th>
+      <th>Giá (k)</th>
+      <th>Calo</th>
+      <th>Số lượng</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="pill">Xôi lạc</span></td>
+      <td class="right">10</td>
+      <td class="right">350</td>
+      <td>
+        <select data-name="Xôi lạc" data-price="10" data-cal="350" class="qty">
+          <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="pill">Xôi trứng</span></td>
+      <td class="right">15</td>
+      <td class="right">420</td>
+      <td>
+        <select data-name="Xôi trứng" data-price="15" data-cal="420" class="qty">
+          <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="pill">Xôi thịt</span></td>
+      <td class="right">25</td>
+      <td class="right">500</td>
+      <td>
+        <select data-name="Xôi thịt" data-price="25" data-cal="500" class="qty">
+          <option value="0">x0</option><option value="1">x1</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="pill">Ruốc topping</span></td>
+      <td class="right">8</td>
+      <td class="right">120</td>
+      <td>
+        <select data-name="Ruốc" data-price="8" data-cal="120" class="qty">
+          <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="pill">Giò topping</span></td>
+      <td class="right">12</td>
+      <td class="right">200</td>
+      <td>
+        <select data-name="Giò" data-price="12" data-cal="200" class="qty">
+          <option value="0">x0</option><option value="1">x1</option><option value="2">x2</option>
+        </select>
+      </td>
+    </tr>
+  </tbody>
+</table>
   <script>
     const $ = (sel, ctx=document) => ctx.querySelector(sel);
     const $$ = (sel, ctx=document) => [...ctx.querySelectorAll(sel)];
@@ -243,3 +228,4 @@
   </script>
 </body>
 </html>
+
